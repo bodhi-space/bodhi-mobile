@@ -288,7 +288,7 @@ window.__Bridge =
         }
 
         setTimeout(function() {
-            BodhiMobileBridge.execAfterInitialization(callInfo, moduleName, functionName, parameters);
+            __Bridge.execAfterInitialization(callInfo, moduleName, functionName, parameters);
         }, 0);
 
         return callInfo.promise;
@@ -432,7 +432,7 @@ window.__Bridge =
     iosNativeCallReceived: function()
     {
         setTimeout(function() {
-                                BodhiMobileBridge._iosNativeCallReceived();
+                                __Bridge._iosNativeCallReceived();
                         }, 0);
     },
 
