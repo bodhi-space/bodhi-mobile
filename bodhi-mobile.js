@@ -1,7 +1,7 @@
-/***************************** rbcBridgeKernel *****************************/
+/***************************** BridgeKernel *****************************/
 
 
-var RBCBridgePlatforms =
+var BodhiMobileBridgePlatforms =
 {
     UNKNOWN : 0,
     IOS     : 1,
@@ -10,7 +10,7 @@ var RBCBridgePlatforms =
     WIN8_1  : 4
 };
 
-var RBCBridgeStates =
+var BodhiMobileBridgeStates =
 {
     NOT_INITIALIZED     : 0,
     WAIT_PARAMETERS     : 1,
@@ -18,13 +18,13 @@ var RBCBridgeStates =
     IN_FLIGHT           : 3
 };
 
-var RBCPromise = function ()
+var BodhiMobilePromise = function ()
 {
     this.onSuccessCallbacks = [];
     this.onFailedCallbacks = [];
 };
 
-RBCPromise.prototype.then = function (onSuccess, onFailed)
+BodhiMobilePromise.prototype.then = function (onSuccess, onFailed)
 {
     if (onSuccess != null && onSuccess !== undefined)
         this.onSuccessCallbacks.push(onSuccess);
@@ -35,7 +35,7 @@ RBCPromise.prototype.then = function (onSuccess, onFailed)
     return this;
 };
 
-RBCPromise.prototype.fail = function (onFailed)
+BodhiMobilePromise.prototype.fail = function (onFailed)
 {
     if (onFailed != null && onFailed !== undefined)
         this.onFailedCallbacks.push(onFailed);
@@ -43,7 +43,7 @@ RBCPromise.prototype.fail = function (onFailed)
     return this;
 };
 
-RBCPromise.prototype.success = function (onSuccess)
+BodhiMobilePromise.prototype.success = function (onSuccess)
 {
     if (onSuccess != null && onSuccess !== undefined)
         this.onSuccessCallbacks.push(onSuccess);
@@ -51,7 +51,7 @@ RBCPromise.prototype.success = function (onSuccess)
     return this;
 };
 
-RBCPromise.prototype.finishedSuccessfully = function (info)
+BodhiMobilePromise.prototype.finishedSuccessfully = function (info)
 {
     var callbacksCount = this.onSuccessCallbacks.length;
     for (var i = 0; i < callbacksCount; i++)
@@ -60,7 +60,7 @@ RBCPromise.prototype.finishedSuccessfully = function (info)
     }
 };
  
-RBCPromise.prototype.finishedWithError = function (error)
+BodhiMobilePromise.prototype.finishedWithError = function (error)
 {
     var callbacksCount = this.onFailedCallbacks.length;
     for (var i = 0; i < callbacksCount; i++)
@@ -69,18 +69,18 @@ RBCPromise.prototype.finishedWithError = function (error)
     }
 };
 
-function rbcWindowsPhoneNotifyHack( str )
+function __WindowsPhoneNotifyHack( str )
 {
     window.external.notify( str );
 }
 
-window.RBCBridge =
+window.__Bridge =
 {
-    bridgeVersion: "0.0.1",
-    bridgeScheme: "rbc://",
+    bridgeVersion: "0.0.2",
+    bridgeScheme: "bodhi://",
 
-    state: RBCBridgeStates.NOT_INITIALIZED,
-    platform: RBCBridgePlatforms.UNKNOWN,
+    state: BodhiMobileBridgeStates.NOT_INITIALIZED,
+    platform: BodhiMobileBridgePlatforms.UNKNOWN,
 
     nativeCalls: new Object(),
     lastNativeCallId: 0,
@@ -114,23 +114,23 @@ window.RBCBridge =
 
     isInitialized: function()
     {
-        return (this.state == RBCBridgeStates.INITIALIZED ||
-                this.state == RBCBridgeStates.IN_FLIGHT);
+        return (this.state == BodhiMobileBridgeStates.INITIALIZED ||
+                this.state == BodhiMobileBridgeStates.IN_FLIGHT);
     },
 
     initializationComplete: function( platform )
     {
-        if (this.platform != RBCBridgePlatforms.UNKNOWN)
+        if (this.platform != BodhiMobileBridgePlatforms.UNKNOWN)
             return;
 
         if (platform === 'ios')
-            this.platform = RBCBridgePlatforms.IOS;
+            this.platform = BodhiMobileBridgePlatforms.IOS;
         else if (platform === 'android')
-            this.platform = RBCBridgePlatforms.ANDROID;
+            this.platform = BodhiMobileBridgePlatforms.ANDROID;
         else if (platform === 'wp')
-            this.platform = RBCBridgePlatforms.WP;
+            this.platform = BodhiMobileBridgePlatforms.WP;
         else if (platform === 'w8_1')
-            this.platform = RBCBridgePlatforms.WIN8_1;
+            this.platform = BodhiMobileBridgePlatforms.WIN8_1;
         else
             return;
 
@@ -142,7 +142,7 @@ window.RBCBridge =
                 for (var module in parameters)
                 {
                     var values = parameters[module];
-                    var callback = RBCBridge.preloadCallbacks[module];
+                    var callback = __Bridge.preloadCallbacks[module];
 
                     if (callback)
                     {
@@ -153,15 +153,15 @@ window.RBCBridge =
                     }
                 }
 
-                RBCBridge.preloadParameters = null;
-                RBCBridge.preloadCallbacks = null;
+                __Bridge.preloadParameters = null;
+                __Bridge.preloadCallbacks = null;
 
                 setTimeout(function() {
-                                RBCBridge._initilizationFinished();
+                                __Bridge._initilizationFinished();
                         }, 0);
             }, null, null, true);
 
-            this.state = RBCBridgeStates.WAIT_PARAMETERS;
+            this.state = BodhiMobileBridgeStates.WAIT_PARAMETERS;
             return this.bridgeVersion;
         }
 
@@ -172,7 +172,7 @@ window.RBCBridge =
 
     _initilizationFinished: function()
     {
-        this.state = RBCBridgeStates.INITIALIZED;
+        this.state = BodhiMobileBridgeStates.INITIALIZED;
 
         for (var key in this.nativeCalls)
         {
@@ -269,15 +269,15 @@ window.RBCBridge =
         {
             callId: callId,
             convertOut: convertOut,
-        	promise: new RBCPromise()
+        	promise: new BodhiMobilePromise()
         };
 
         callInfo.promise.then(successCallback, failedCallback);
         
         this.nativeCalls[callId] = callInfo;
 
-        if ((this.state == RBCBridgeStates.NOT_INITIALIZED ||
-             this.state == RBCBridgeStates.WAIT_PARAMETERS) && (sendAnyway !== true))
+        if ((this.state == BodhiMobileBridgeStates.NOT_INITIALIZED ||
+             this.state == BodhiMobileBridgeStates.WAIT_PARAMETERS) && (sendAnyway !== true))
         {
             // Bridge not initialized yet
             callInfo["moduleName"] = moduleName;
@@ -288,7 +288,7 @@ window.RBCBridge =
         }
 
         setTimeout(function() {
-            RBCBridge.execAfterInitialization(callInfo, moduleName, functionName, parameters);
+            BodhiMobileBridge.execAfterInitialization(callInfo, moduleName, functionName, parameters);
         }, 0);
 
         return callInfo.promise;
@@ -395,55 +395,55 @@ window.RBCBridge =
         if (universalParameters == null || universalParameters === undefined)
             universalParameters = callInfo.parameters;
 
-        if (this.platform == RBCBridgePlatforms.ANDROID)
+        if (this.platform == BodhiMobileBridgePlatforms.ANDROID)
         {
-            RBCAndroidBridgeInterface.execute(universalModuleName, universalFunctionName, callInfo.callId, this.stringify(universalParameters));
+            __AndroidBridgeInterface.execute(universalModuleName, universalFunctionName, callInfo.callId, this.stringify(universalParameters));
 
             return;
         }
 
-        var isWinPlatforms = (this.platform == RBCBridgePlatforms.WP || this.platform == RBCBridgePlatforms.WIN8_1);
+        var isWinPlatforms = (this.platform == BodhiMobileBridgePlatforms.WP || this.platform == BodhiMobileBridgePlatforms.WIN8_1);
 
         var callUrl = this.buildCallUrl(universalModuleName, universalFunctionName, callInfo.callId, universalParameters, isWinPlatforms);
 
         if (isWinPlatforms)
         {
-            rbcWindowsPhoneNotifyHack(callUrl);
+            __WindowsPhoneNotifyHack(callUrl);
             return;
         }
 
-        if (this.state == RBCBridgeStates.WAIT_PARAMETERS)
+        if (this.state == BodhiMobileBridgeStates.WAIT_PARAMETERS)
         {
             this.sendNativeCallInURL( callUrl );
             return;
         }
 
-        if (this.state == RBCBridgeStates.IN_FLIGHT)
+        if (this.state == BodhiMobileBridgeStates.IN_FLIGHT)
         {
             this.iosURLQueue.push( callUrl );
 
             return;
         }
 
-        this.state = RBCBridgeStates.IN_FLIGHT;
+        this.state = BodhiMobileBridgeStates.IN_FLIGHT;
         this.sendNativeCallInURL( callUrl );
     },
 
     iosNativeCallReceived: function()
     {
         setTimeout(function() {
-                                RBCBridge._iosNativeCallReceived();
+                                BodhiMobileBridge._iosNativeCallReceived();
                         }, 0);
     },
 
     _iosNativeCallReceived: function()
     {
-        if (this.state == RBCBridgeStates.WAIT_PARAMETERS)
+        if (this.state == BodhiMobileBridgeStates.WAIT_PARAMETERS)
             return;
 
         if ( this.iosURLQueue.length == 0 )
         {
-            this.state = RBCBridgeStates.INITIALIZED;
+            this.state = BodhiMobileBridgeStates.INITIALIZED;
             return;
         }
  
@@ -454,7 +454,7 @@ window.RBCBridge =
     nativeCallComplete: function( callId, status, response )
     {
         setTimeout(function() {
-                            var callInfo = RBCBridge.nativeCalls[callId];
+                            var callInfo = __Bridge.nativeCalls[callId];
 
                             if (callInfo == null ||
                                 callInfo === undefined)
@@ -466,7 +466,7 @@ window.RBCBridge =
                                 callInfo.promise.finishedWithError(response);
 
                             if (status === true || status == false)
-                                delete RBCBridge.nativeCalls[callId];
+                                delete __Bridge.nativeCalls[callId];
                         }, 0);
     },
 
@@ -510,7 +510,7 @@ window.events =
 
             this.unregisteredObservers.push(eventName);
 
-            if (needSetTimer && RBCBridge.isInitialized())
+            if (needSetTimer && __Bridge.isInitialized())
             {
                 setTimeout(function() {
                                 events.sendUnregisteredObservers();
@@ -553,7 +553,7 @@ window.events =
                     return;
                 }
 
-                RBCBridge.exec( "internal", "removeObservers", {"events" : [ eventName ]} );
+                __Bridge.exec( "internal", "removeObservers", {"events" : [ eventName ]} );
             }
         }
     },
@@ -591,31 +591,31 @@ window.events =
     sendUnregisteredObservers: function ()
     {
         if (events.unregisteredObservers != null && events.unregisteredObservers.length > 0)
-            RBCBridge.exec( "internal", "addObservers", {"events" : events.unregisteredObservers} );
+            __Bridge.exec( "internal", "addObservers", {"events" : events.unregisteredObservers} );
 
         events.unregisteredObservers = null;
     }
 };
 
-RBCBridge.initialized(events.sendUnregisteredObservers);
+__Bridge.initialized(events.sendUnregisteredObservers);
 
 
 /***************************** errors *****************************/
 
 
-window.RBCErrors = {}
+window.BodhiMobileErrors = {}
 
-RBCErrors.Unknown			 	= 0;
-RBCErrors.ModuleNotSupported 	= 1;
-RBCErrors.FunctionNotSupported 	= 2;
-RBCErrors.PermissionDenied		= 3;
-RBCErrors.WrongParameters 		= 4;
-RBCErrors.Timeout		 		= 5;
-RBCErrors.Formatting			= 6;
-RBCErrors.Parsing				= 7;
-RBCErrors.CancelledByUser		= 8;
-RBCErrors.NotFound				= 9;
-RBCErrors.Internal				= 1000;
+BodhiMobileErrors.Unknown			 	= 0;
+BodhiMobileErrors.ModuleNotSupported 	= 1;
+BodhiMobileErrors.FunctionNotSupported 	= 2;
+BodhiMobileErrors.PermissionDenied		= 3;
+BodhiMobileErrors.WrongParameters 		= 4;
+BodhiMobileErrors.Timeout		 		= 5;
+BodhiMobileErrors.Formatting			= 6;
+BodhiMobileErrors.Parsing				= 7;
+BodhiMobileErrors.CancelledByUser		= 8;
+BodhiMobileErrors.NotFound				= 9;
+BodhiMobileErrors.Internal				= 1000;
 
 
 /***************************** device *****************************/
@@ -640,7 +640,7 @@ window.device =
 
 	ready: function ( readyCallback )
 	{
-		RBCBridge.initialized(readyCallback);
+		__Bridge.initialized(readyCallback);
 
 		return this;
 	},
@@ -660,7 +660,7 @@ window.device =
 	}
 }
 
-RBCBridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild"], function (parameters) {
+__Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild"], function (parameters) {
 	if (parameters && parameters.device)
 	{
 		for (var key in parameters.device) {
@@ -685,7 +685,7 @@ window.deviceOrientation =
 
 	setOrientation: function ( orientation, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("orientation", "setOrientation", ["orientation", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("orientation", "setOrientation", ["orientation", "successCallback", "failedCallback"], arguments);
 	}
 }
 
@@ -693,7 +693,7 @@ window.deviceOrientation =
 /***************************** connection *****************************/
 
 
-var RBCConnectionMonitor = function() {
+var BodhiMobileConnectionMonitor = function() {
     this.id = null;
     this.url = null;
     this.available = false;
@@ -701,10 +701,10 @@ var RBCConnectionMonitor = function() {
     this._availableCallbacks = [];
 };
 
-RBCConnectionMonitor.prototype.stop = function(successCallback, errorCallback) {
+BodhiMobileConnectionMonitor.prototype.stop = function(successCallback, errorCallback) {
     var monitor = this;
 
-    return RBCBridge.exec("connection", "stopMonitoring", {
+    return __Bridge.exec("connection", "stopMonitoring", {
         "monitorId": monitor.id
     }, function() {
         window.connection._closeConnectionMonitor(monitor);
@@ -713,7 +713,7 @@ RBCConnectionMonitor.prototype.stop = function(successCallback, errorCallback) {
     }, errorCallback);
 };
 
-RBCConnectionMonitor.prototype.onAvailableChanged = function(callback) {
+BodhiMobileConnectionMonitor.prototype.onAvailableChanged = function(callback) {
     this._availableCallbacks.push(callback);
     return this;
 };
@@ -748,7 +748,7 @@ window.connection = {
      *
      * return value in successCallback:
      * info {
-                monitor: RBCConnectionMonitor object
+                monitor: BodhiMobileConnectionMonitor object
             }
      * return value in errorCallback:
      * error {
@@ -757,7 +757,7 @@ window.connection = {
              }
      */
     startMonitoring: function(options, successCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
         successCallback = preparedArguments.successCallback;
         errorCallback = preparedArguments.failedCallback;
@@ -766,7 +766,7 @@ window.connection = {
             if (info.monitorId == null || info.monitorId === undefined)
                 return;
 
-            var connectionMonitor = new RBCConnectionMonitor();
+            var connectionMonitor = new BodhiMobileConnectionMonitor();
             connectionMonitor.id = info.monitorId;
             connectionMonitor.url = info.url;
             connectionMonitor.available = info.available || false;
@@ -784,7 +784,7 @@ window.connection = {
             }, 0);
         };
 
-        return RBCBridge.exec("connection", "startMonitoring", preparedArguments.parameters, winCallback, errorCallback);
+        return __Bridge.exec("connection", "startMonitoring", preparedArguments.parameters, winCallback, errorCallback);
     },
 
     isOnline: function() {
@@ -839,7 +839,7 @@ window.connection = {
     }
 }
 
-RBCBridge.loadParameters("connection", ["state", "type"], function(parameters) {
+__Bridge.loadParameters("connection", ["state", "type"], function(parameters) {
     connection.state = parameters.connection.state;
     connection.type = parameters.connection.type;
 });
@@ -922,7 +922,7 @@ window.battery =
 	}
 }
 
-RBCBridge.loadParameters("battery", ["state"], function (parameters) {
+__Bridge.loadParameters("battery", ["state"], function (parameters) {
 	battery._batteryStateChanged(parameters.battery);
 });
 
@@ -961,7 +961,7 @@ window.authentication =
 	 */
 	login: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("authentication", "login", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("authentication", "login", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -974,7 +974,7 @@ window.authentication =
 	 */
 	logout: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("authentication", "logout", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("authentication", "logout", ["successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -991,11 +991,11 @@ window.authentication =
 	 */
 	getCredentialsInfo: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("authentication", "getCredentialsInfo", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("authentication", "getCredentialsInfo", ["successCallback", "failedCallback"], arguments);
 	}
 };
 
-RBCBridge.loadParameters("authentication", ["supported", "username"], function (parameters) {
+__Bridge.loadParameters("authentication", ["supported", "username"], function (parameters) {
 	if (parameters.authentication != null && parameters.authentication !== undefined &&
 		parameters.authentication.username != null && parameters.authentication.username !== undefined)
 	{
@@ -1035,62 +1035,62 @@ window.globalization =
 {
 	getPreferredLanguage: function (successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getPreferredLanguage", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getPreferredLanguage", ["successCallback", "failedCallback"], arguments);
 	},
 
 	getLocaleName: function (successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getLocaleName", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getLocaleName", ["successCallback", "failedCallback"], arguments);
 	},
 
 	dateToString: function (date, options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "dateToString", ["date", "options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "dateToString", ["date", "options", "successCallback", "failedCallback"], arguments);
 	},
 
 	stringToDate: function (dateString, options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "stringToDate", ["dateString", "options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "stringToDate", ["dateString", "options", "successCallback", "failedCallback"], arguments);
 	},
 
 	getDatePattern: function (options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getDatePattern", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getDatePattern", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	getDateNames: function (options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getDateNames", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getDateNames", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	isDayLightSavingsTime: function (date, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "isDayLightSavingsTime", ["date", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "isDayLightSavingsTime", ["date", "successCallback", "failedCallback"], arguments);
 	},
 
 	getFirstDayOfWeek: function (successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getFirstDayOfWeek", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getFirstDayOfWeek", ["successCallback", "failedCallback"], arguments);
 	},
 
 	numberToString: function (number, options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "numberToString", ["number", "options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "numberToString", ["number", "options", "successCallback", "failedCallback"], arguments);
 	},
 
 	stringToNumber: function (string, options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "stringToNumber", ["numberString", "options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "stringToNumber", ["numberString", "options", "successCallback", "failedCallback"], arguments);
 	},
 
 	getNumberPattern: function (options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getNumberPattern", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getNumberPattern", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	getCurrencyPattern: function (currencyCode, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("globalization", "getCurrencyPattern", ["currencyCode", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("globalization", "getCurrencyPattern", ["currencyCode", "successCallback", "failedCallback"], arguments);
 	}
 }
 
@@ -1109,22 +1109,22 @@ window.notifications =
 	 */
 	vibrate: function ( options )
 	{
-		return RBCBridge.execWithArguments("notifications", "vibrate", ["options"], arguments);
+		return __Bridge.execWithArguments("notifications", "vibrate", ["options"], arguments);
 	},
 
 	beep: function ( )
 	{
-		return RBCBridge.exec("notifications", "beep");
+		return __Bridge.exec("notifications", "beep");
 	},
 
 	alert: function ( title, message, cancelButton, otherButtons, callback )
 	{
-		return RBCBridge.execWithArguments("notifications", "alert", ["title", "message", "cancelButton", "otherButtons", "successCallback"], arguments);
+		return __Bridge.execWithArguments("notifications", "alert", ["title", "message", "cancelButton", "otherButtons", "successCallback"], arguments);
 	},
 
     showToast : function ( message, duration, position, errorCallback ) 
     {
-            return RBCBridge.execWithArguments("notifications", "showToast", ["message","duration","position","failedCallback"], arguments);
+            return __Bridge.execWithArguments("notifications", "showToast", ["message","duration","position","failedCallback"], arguments);
     },
 
 	local: {
@@ -1150,7 +1150,7 @@ window.notifications =
 	     */
 		add: function (notification, successCallback, errorCallback)
 		{
-			return RBCBridge.execWithArguments("localnotifications", "add", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
+			return __Bridge.execWithArguments("localnotifications", "add", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
 		},
 
 	    /*
@@ -1165,7 +1165,7 @@ window.notifications =
 	     */
 		cancel: function (notification, successCallback, errorCallback)
 		{
-			return RBCBridge.execWithArguments("localnotifications", "cancel", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
+			return __Bridge.execWithArguments("localnotifications", "cancel", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
 		},
 
 	    /*
@@ -1179,7 +1179,7 @@ window.notifications =
 	     */
 		cancelAll: function (successCallback, errorCallback)
 		{
-			return RBCBridge.execWithArguments("localnotifications", "cancelAll", ["successCallback", "failedCallback"], arguments);
+			return __Bridge.execWithArguments("localnotifications", "cancelAll", ["successCallback", "failedCallback"], arguments);
 		},
 
 	    /*
@@ -1196,7 +1196,7 @@ window.notifications =
 	     */
 		getScheduled: function (successCallback, errorCallback)
 		{
-			return RBCBridge.execWithArguments("localnotifications", "getScheduled", ["successCallback", "failedCallback"], arguments, null, this._convertOut);
+			return __Bridge.execWithArguments("localnotifications", "getScheduled", ["successCallback", "failedCallback"], arguments, null, this._convertOut);
 		},
 
 		/*
@@ -1215,7 +1215,7 @@ window.notifications =
 	     */
 		isScheduled: function (notification, successCallback, errorCallback)
 		{
-			return RBCBridge.execWithArguments("localnotifications", "isScheduled", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
+			return __Bridge.execWithArguments("localnotifications", "isScheduled", ["notification", "successCallback", "failedCallback"], arguments, this._convertIn);
 		},
 
 		received: function (callback)
@@ -1264,7 +1264,7 @@ window.notifications =
 	}
 };
 
-RBCBridge.loadParameters("notifications", ["replaceSystemAlert"], function (parameters) {
+__Bridge.loadParameters("notifications", ["replaceSystemAlert"], function (parameters) {
 	if (parameters.notifications.replaceSystemAlert === true)
 	{
 		 window.alert = function (message) {
@@ -1309,27 +1309,27 @@ window.contacts =
 	 */
 	find: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("contacts", "find", ["options", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("contacts", "find", ["options", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	findById: function ( contactId, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("contacts", "find", ["contactId", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("contacts", "find", ["contactId", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	create: function ( contact, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("contacts", "create", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("contacts", "create", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	update: function ( contact, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("contacts", "update", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("contacts", "update", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	delete: function ( contact, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("contacts", "delete", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("contacts", "delete", ["contact", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	/************* Internal Methods *************/
@@ -1432,7 +1432,7 @@ window.calendar =
 	 */
 	getCalendars: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "getCalendars", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("calendar", "getCalendars", ["successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -1449,7 +1449,7 @@ window.calendar =
 	 */
 	getCalendarById: function ( calendarId, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "getCalendarById", ["calendarId", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("calendar", "getCalendarById", ["calendarId", "successCallback", "failedCallback"], arguments);
 	},
 
     /*
@@ -1471,7 +1471,7 @@ window.calendar =
 	 */
 	getEvents: function (options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "getEvents", ["options","successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("calendar", "getEvents", ["options","successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	/*
@@ -1488,7 +1488,7 @@ window.calendar =
 	 */
 	getEventById: function ( eventId, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "getEventById", ["eventId", "successCallback", "failedCallback"], arguments, null, this._convertOut);
+		return __Bridge.execWithArguments("calendar", "getEventById", ["eventId", "successCallback", "failedCallback"], arguments, null, this._convertOut);
 	},
 
 	/*
@@ -1505,7 +1505,7 @@ window.calendar =
 	 */
 	create: function ( event, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "createEvent", ["event", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("calendar", "createEvent", ["event", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	/*
@@ -1519,7 +1519,7 @@ window.calendar =
 	 */
 	delete: function ( event, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("calendar", "deleteEvent", ["event", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
+		return __Bridge.execWithArguments("calendar", "deleteEvent", ["event", "successCallback", "failedCallback"], arguments, this._convertIn, this._convertOut);
 	},
 
 	/************* Internal Methods *************/
@@ -1624,7 +1624,7 @@ window.barcode =
 
 	scan: function (options, successCallback, errorCallback)
 	{
-		return RBCBridge.execWithArguments("barcode", "scan", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("barcode", "scan", ["options", "successCallback", "failedCallback"], arguments);
 	}
 };
 
@@ -1666,7 +1666,7 @@ window.camera =
   	 */
   	getMedia: function(options, successCallback, errorCallback)
   	{
-  		return RBCBridge.execWithArguments("camera", "getMedia", ["options", "successCallback", "failedCallback"], arguments);
+  		return __Bridge.execWithArguments("camera", "getMedia", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	takeMedia: function(options, successCallback, errorCallback)
@@ -1717,7 +1717,7 @@ window.camera =
 
 	cleanup: function(successCallback, errorCallback)
 	{
-  		return RBCBridge.execWithArguments("camera", "cleanup", ["successCallback", "failedCallback"], arguments);
+  		return __Bridge.execWithArguments("camera", "cleanup", ["successCallback", "failedCallback"], arguments);
 	},
 
 	barcode: window.barcode
@@ -1727,7 +1727,7 @@ window.camera =
 /***************************** audio *****************************/
 
 
-var RBCAudioItemState = {
+var BodhiMobileAudioItemState = {
   STOPPED: 0,
   PLAYING: 1,
   PAUSED: 2,
@@ -1735,10 +1735,10 @@ var RBCAudioItemState = {
   INTERRUPTER: 4
 };
 
-var RBCAudioItem = function() {
+var BodhiMobileAudioItem = function() {
   this.itemId = null;
   this.key = null;
-  this.state = RBCAudioItemState.STOPPED;
+  this.state = BodhiMobileAudioItemState.STOPPED;
   this.duration = 0;
   this.position = 0;
 
@@ -1747,21 +1747,21 @@ var RBCAudioItem = function() {
   this._positionCallbacks = [];
 };
 
-RBCAudioItem.prototype.close = function(successCallback, errorCallback) {
+BodhiMobileAudioItem.prototype.close = function(successCallback, errorCallback) {
   this._stateCallbacks = [];
   this._durationCallbacks = [];
   this._positionCallbacks = [];
 
   audio._closeAudioItem(this);
 
-  return RBCBridge.exec("audio", "close", {
+  return __Bridge.exec("audio", "close", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.getDuration = function(successCallback, errorCallback) {
+BodhiMobileAudioItem.prototype.getDuration = function(successCallback, errorCallback) {
   var audioId = this.itemId;
-  return RBCBridge.exec("audio", "getDuration", {
+  return __Bridge.exec("audio", "getDuration", {
     "audioId": this.itemId
   }, function(info) {
     audio._onProgressChanged({
@@ -1774,61 +1774,61 @@ RBCAudioItem.prototype.getDuration = function(successCallback, errorCallback) {
   }, errorCallback);
 };
 
-RBCAudioItem.prototype.startPlaying = function(successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "startPlaying", {
+BodhiMobileAudioItem.prototype.startPlaying = function(successCallback, errorCallback) {
+  return __Bridge.exec("audio", "startPlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.stopPlaying = function(successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "stopPlaying", {
+BodhiMobileAudioItem.prototype.stopPlaying = function(successCallback, errorCallback) {
+  return __Bridge.exec("audio", "stopPlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.pausePlaying = function(successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "pausePlaying", {
+BodhiMobileAudioItem.prototype.pausePlaying = function(successCallback, errorCallback) {
+  return __Bridge.exec("audio", "pausePlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.seekTo = function(position, successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "seekTo", {
+BodhiMobileAudioItem.prototype.seekTo = function(position, successCallback, errorCallback) {
+  return __Bridge.exec("audio", "seekTo", {
     "audioId": this.itemId,
     "position": position
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.startRecording = function(successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "startRecording", {
+BodhiMobileAudioItem.prototype.startRecording = function(successCallback, errorCallback) {
+  return __Bridge.exec("audio", "startRecording", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.stopRecording = function(successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "stopRecording", {
+BodhiMobileAudioItem.prototype.stopRecording = function(successCallback, errorCallback) {
+  return __Bridge.exec("audio", "stopRecording", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.setVolume = function(volume, successCallback, errorCallback) {
-  return RBCBridge.exec("audio", "setVolume", {
+BodhiMobileAudioItem.prototype.setVolume = function(volume, successCallback, errorCallback) {
+  return __Bridge.exec("audio", "setVolume", {
     "audioId": this.itemId,
     "volume": volume
   }, successCallback, errorCallback);
 };
 
-RBCAudioItem.prototype.onStateChanged = function(callback) {
+BodhiMobileAudioItem.prototype.onStateChanged = function(callback) {
   this._stateCallbacks.push(callback);
   return this;
 };
 
-RBCAudioItem.prototype.onDurationChanged = function(callback) {
+BodhiMobileAudioItem.prototype.onDurationChanged = function(callback) {
   this._durationCallbacks.push(callback);
   return this;
 };
 
-RBCAudioItem.prototype.onPositionChanged = function(callback) {
+BodhiMobileAudioItem.prototype.onPositionChanged = function(callback) {
   this._positionCallbacks.push(callback);
   return this;
 };
@@ -1839,7 +1839,7 @@ window.audio = {
    * options fields: {key: string}
    */
   getAudio: function(options, successCallback, errorCallback) {
-    var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+    var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
     successCallback = preparedArguments.successCallback;
     errorCallback = preparedArguments.failedCallback;
@@ -1848,7 +1848,7 @@ window.audio = {
       if (info.audioId == null || info.audioId === undefined)
         return;
 
-      var audioItem = new RBCAudioItem();
+      var audioItem = new BodhiMobileAudioItem();
       audioItem.itemId = info.audioId;
       audioItem.key = info.key;
 
@@ -1866,7 +1866,7 @@ window.audio = {
       }, 0);
     };
 
-    return RBCBridge.exec("audio", "getAudio", preparedArguments.parameters, winCallback, errorCallback);
+    return __Bridge.exec("audio", "getAudio", preparedArguments.parameters, winCallback, errorCallback);
   },
 
   _closeAudioItem: function(audioItem) {
@@ -1988,7 +1988,7 @@ window.geofencing =
 	 */
 	getRegions: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "getRegions", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "getRegions", ["successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -2004,31 +2004,31 @@ window.geofencing =
 	 */
 	addRegion: function (regionItem, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "addRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "addRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
 	},
 
 	checkRegion: function (regionItem, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "checkRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "checkRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeRegion: function (regionItem, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "removeRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "removeRegion", ["regionItem", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeAllRegions: function (successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "removeAllRegions", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "removeAllRegions", ["successCallback", "failedCallback"], arguments);
 	},
 
 	getPageRegion: function (successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("geofencing", "getPageRegion", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("geofencing", "getPageRegion", ["successCallback", "failedCallback"], arguments);
 	}
 };
 
-RBCBridge.loadParameters("geofencing", ["supported"], function (parameters) {
+__Bridge.loadParameters("geofencing", ["supported"], function (parameters) {
 	if (parameters.geofencing)
 		geofencing.supported = parameters.geofencing.supported || false;
 	else
@@ -2056,7 +2056,7 @@ window.geolocation =
 	lastPosition: null,
     
     getCurrentPosition: function(options, successCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
         options = this._prepareOptions(preparedArguments.parameters.options);
         successCallback = preparedArguments.successCallback;
@@ -2090,7 +2090,7 @@ window.geolocation =
             successCallback(geolocation.lastPosition);
         } else if (options.timeout === 0) {
             fail({
-                code:RBCErrors.Timeout,
+                code:__Errors.Timeout,
                 message:"timeout value in options set to 0 and no cached Position object available, or cached Position object's age exceeds provided options maximumAge parameter."
             });
         } else {
@@ -2105,13 +2105,13 @@ window.geolocation =
                 // always truthy before we call into native
                 timeoutTimer.timer = true;
             }
-            RBCBridge.exec("geolocation", "getLocation", {"options":options}, winCallback, failCallback, geolocation._convertOut);
+            __Bridge.exec("geolocation", "getLocation", {"options":options}, winCallback, failCallback, geolocation._convertOut);
         }
         return timeoutTimer;
     },
 
     watchPosition:function(options, successCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
         options = this._prepareOptions(preparedArguments.parameters.options);
         successCallback = preparedArguments.successCallback;
@@ -2130,14 +2130,14 @@ window.geolocation =
             	successCallback(position);
         };
 
-        RBCBridge.exec("geolocation", "addWatch", {"options":options, "id":id}, winCallback, errorCallback, geolocation._convertOut);
+        __Bridge.exec("geolocation", "addWatch", {"options":options, "id":id}, winCallback, errorCallback, geolocation._convertOut);
 
         return id;
     },
 
     clearWatch:function(id) {
         if (id) {
-            RBCBridge.exec("geolocation", "clearWatch", {"id":id});
+            __Bridge.exec("geolocation", "clearWatch", {"id":id});
         }
     },
 
@@ -2173,7 +2173,7 @@ window.geolocation =
         	clearTimeout(t);
         	t = null;
         	errorCallback({
-            	code:RBCErrors.Timeout,
+            	code:__Errors.Timeout,
             	message:"Position retrieval timed out."
        		});
     	}, timeout);
@@ -2233,7 +2233,7 @@ window.accelerometer =
          }
     */
     getCurrentAcceleration: function(options, successCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
         options = preparedArguments.parameters.options;
         successCallback = preparedArguments.successCallback;
@@ -2273,7 +2273,7 @@ window.accelerometer =
          }
     */
     watchAcceleration:function(options, successCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
 
         options = preparedArguments.parameters.options;
         successCallback = preparedArguments.successCallback;
@@ -2281,7 +2281,7 @@ window.accelerometer =
 
         var id = this._getId();
 
-        RBCBridge.exec("accelerometer", "addWatch", {"options":options, "id":id}, successCallback, errorCallback, geolocation._convertOut);
+        __Bridge.exec("accelerometer", "addWatch", {"options":options, "id":id}, successCallback, errorCallback, geolocation._convertOut);
 
         return id;
     },
@@ -2291,7 +2291,7 @@ window.accelerometer =
     */
     clearWatch:function(id) {
         if (id) {
-            RBCBridge.exec("accelerometer", "clearWatch", {"id":id});
+            __Bridge.exec("accelerometer", "clearWatch", {"id":id});
         }
     },
 
@@ -2325,7 +2325,7 @@ window.accelerometer =
 window.shakeDetector =
 {
     startWatch: function(onDetectCallback, errorCallback) {
-        var preparedArguments = RBCBridge.prepareArguments(["successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["successCallback", "failedCallback"], arguments);
 
         successCallback = preparedArguments.successCallback;
         errorCallback = preparedArguments.failedCallback;
@@ -2377,7 +2377,7 @@ window.shakeDetector =
     }
 };
 
-RBCBridge.loadParameters("shakeDetector", ["detectInternal"], function (parameters) {
+__Bridge.loadParameters("shakeDetector", ["detectInternal"], function (parameters) {
     if (parameters && parameters.shakeDetector && parameters.shakeDetector.detectInternal)
     {
         shakeDetector._detectShakeInternal = true;
@@ -2454,14 +2454,14 @@ window.compass =
     watchHeading:function(successCallback, errorCallback) {
         var id = this._getId();
 
-        RBCBridge.exec("compass", "addWatch", {"id":id}, successCallback, errorCallback, this._convertOut);
+        __Bridge.exec("compass", "addWatch", {"id":id}, successCallback, errorCallback, this._convertOut);
 
         return id;
     },
 
     clearWatch:function(id) {
         if (id) {
-            RBCBridge.exec("compass", "clearWatch", {"id":id});
+            __Bridge.exec("compass", "clearWatch", {"id":id});
         }
     },
 
@@ -2502,7 +2502,7 @@ window.messaging =
 	 */
 	sms: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("messaging", "sms", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("messaging", "sms", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -2516,12 +2516,12 @@ window.messaging =
 	 */
 	email: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("messaging", "email", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("messaging", "email", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	supportAttachments: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("messaging", "supportAttachments", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("messaging", "supportAttachments", ["successCallback", "failedCallback"], arguments);
 	}
 }
 
@@ -2538,7 +2538,7 @@ window.cryptography =
 	 */
 	hash: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("crypto", "hash", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("crypto", "hash", ["options", "successCallback", "failedCallback"], arguments);
 	}
 }
 
@@ -2546,7 +2546,7 @@ window.cryptography =
 /***************************** appStorage *****************************/
 
 
-function RBCAppStorage(shared)
+function BodhiMobileAppStorage(shared)
 {
 	this.__shared = shared;
 
@@ -2578,14 +2578,14 @@ function RBCAppStorage(shared)
 	 */
 	this.put = function ( options, successCallback, errorCallback )
 	{
-        var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+        var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
         var parameters = preparedArguments.parameters;
     	if (parameters == null || parameters === undefined)
     		parameters = {};
 
     	parameters.shared = this.__shared;
 
-		return RBCBridge.exec("appStorage", "put", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
+		return __Bridge.exec("appStorage", "put", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
 	};
 
 	/*
@@ -2613,14 +2613,14 @@ function RBCAppStorage(shared)
 	 */
 	this.getAllKeys = function ( options, successCallback, errorCallback )
 	{
-		var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+		var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
         var parameters = preparedArguments.parameters;
     	if (parameters == null || parameters === undefined)
     		parameters = {};
 
     	parameters.shared = this.__shared;
 
-		return RBCBridge.exec("appStorage", "getAllKeys", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
+		return __Bridge.exec("appStorage", "getAllKeys", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
 	};
 
 	/*
@@ -2657,14 +2657,14 @@ function RBCAppStorage(shared)
 	 */
 	this.get = function ( options, successCallback, errorCallback )
 	{
-		var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+		var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
         var parameters = preparedArguments.parameters;
     	if (parameters == null || parameters === undefined)
     		parameters = {};
 
     	parameters.shared = this.__shared;
 
-		return RBCBridge.exec("appStorage", "get", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
+		return __Bridge.exec("appStorage", "get", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
 	};
 
 	/*
@@ -2685,14 +2685,14 @@ function RBCAppStorage(shared)
 	 */
 	this.delete = function ( options, successCallback, errorCallback )
 	{
-		var preparedArguments = RBCBridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
+		var preparedArguments = __Bridge.prepareArguments(["options", "successCallback", "failedCallback"], arguments);
         var parameters = preparedArguments.parameters;
     	if (parameters == null || parameters === undefined)
     		parameters = {};
 
     	parameters.shared = this.__shared;
 
-		return RBCBridge.exec("appStorage", "delete", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
+		return __Bridge.exec("appStorage", "delete", parameters, preparedArguments.successCallback, preparedArguments.failedCallback);
 	};
 
 	/***************************** Strings Methods ******************************/
@@ -2746,8 +2746,8 @@ function RBCAppStorage(shared)
 	};
 }
 
-window.appStorage = new RBCAppStorage(false);
-window.appStorage.shared = new RBCAppStorage(true);
+window.appStorage = new BodhiMobileAppStorage(false);
+window.appStorage.shared = new BodhiMobileAppStorage(true);
 
 /*
  * options: {
@@ -2767,7 +2767,7 @@ window.appStorage.shared = new RBCAppStorage(true);
  */
 window.appStorage.deleteAll = function ( options, successCallback, errorCallback )
 {
-	return RBCBridge.execWithArguments("appStorage", "deleteAll", ["options", "successCallback", "failedCallback"], arguments);
+	return __Bridge.execWithArguments("appStorage", "deleteAll", ["options", "successCallback", "failedCallback"], arguments);
 };
 
 
@@ -2800,7 +2800,7 @@ window.archiving =
 	 */
 	zip: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("archiving", "zip", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("archiving", "zip", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -2831,7 +2831,7 @@ window.archiving =
 	 */
 	unzip: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("archiving", "unzip", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("archiving", "unzip", ["options", "successCallback", "failedCallback"], arguments);
 	}
 }
 
@@ -2853,7 +2853,7 @@ window.launch =
 	 */
 	browser: function ( options, errorCallback )
 	{
-		return RBCBridge.exec("lookAt", "browser", {"options":options}, null, errorCallback);
+		return __Bridge.exec("lookAt", "browser", {"options":options}, null, errorCallback);
 	},
 
 	/*
@@ -2876,7 +2876,7 @@ window.launch =
 	 */
 	map: function ( options, errorCallback )
 	{
-		return RBCBridge.exec("lookAt", "map", {"options":options}, null, errorCallback);
+		return __Bridge.exec("lookAt", "map", {"options":options}, null, errorCallback);
 	}
 }
 
@@ -2888,22 +2888,22 @@ window.webview =
 {
 	present: function ( url )
 	{
-		return RBCBridge.execWithArguments("webview", "present", ["url"], arguments);
+		return __Bridge.execWithArguments("webview", "present", ["url"], arguments);
 	},
 
 	dismiss: function ( )
 	{
-		return RBCBridge.exec("webview", "dismiss");
+		return __Bridge.exec("webview", "dismiss");
 	},
 
 	open: function ( url )
 	{
-		return RBCBridge.execWithArguments("webview", "open", ["url"], arguments);
+		return __Bridge.execWithArguments("webview", "open", ["url"], arguments);
 	},
 
 	close: function ( )
 	{
-		return RBCBridge.exec("webview", "close");
+		return __Bridge.exec("webview", "close");
 	}
 };
 
@@ -2915,32 +2915,32 @@ window.mainMenu =
 {
 	updateTitle: function ( title, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "updateTitle", ["title", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "updateTitle", ["title", "successCallback", "failedCallback"], arguments);
 	},
 
 	addCustomItem: function ( item, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "addCustomItem", ["item", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "addCustomItem", ["item", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeCustomItem: function ( item, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "removeCustomItem", ["item", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "removeCustomItem", ["item", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeAllCustomItems: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "removeAllCustomItems", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "removeAllCustomItems", ["successCallback", "failedCallback"], arguments);
 	},
 
 	showMenu: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "showMenu", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "showMenu", ["successCallback", "failedCallback"], arguments);
 	},
 
 	bounceMenu: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("mainMenu", "bounceMenu", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("mainMenu", "bounceMenu", ["successCallback", "failedCallback"], arguments);
 	}
 };
 
@@ -2952,22 +2952,32 @@ window.navigationBar =
 {
 	show: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("navigationBar", "show", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("navigationBar", "show", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	hide: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("navigationBar", "hide", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("navigationBar", "hide", ["options", "successCallback", "failedCallback"], arguments);
+	},
+
+	setTheme: function ( options, successCallback, errorCallback )
+	{
+		return __Bridge.execWithArguments("navigationBar", "setTheme", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	setTitle: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("navigationBar", "setTitle", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("navigationBar", "setTitle", ["options", "successCallback", "failedCallback"], arguments);
+	},
+
+	setLeftButton: function ( options, successCallback, errorCallback )
+	{
+		return __Bridge.execWithArguments("navigationBar", "setLeftButton", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	setRightButton: function ( options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("navigationBar", "setRightButton", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("navigationBar", "setRightButton", ["options", "successCallback", "failedCallback"], arguments);
 	}
 };
 
@@ -2992,7 +3002,7 @@ window.iBeacon =
 	 */
 	getRegions: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "getRegions", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "getRegions", ["successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -3018,46 +3028,46 @@ window.iBeacon =
 	 */
 	addRegion: function (options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "addRegion", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "addRegion", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	checkRegion: function (uuid, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "checkRegion", ["uuid", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "checkRegion", ["uuid", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeRegion: function (uuid, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "removeRegion", ["uuid", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "removeRegion", ["uuid", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeAllRegions: function (successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "removeAllRegions", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "removeAllRegions", ["successCallback", "failedCallback"], arguments);
 	},
 
 	addBeacon: function (options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "addBeacon", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "addBeacon", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	getBeacons: function (successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "getBeacons", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "getBeacons", ["successCallback", "failedCallback"], arguments);
 	},
 
 	removeBeacon: function (options, successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "removeBeacon", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "removeBeacon", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	removeAllBeacons: function ( successCallback, errorCallback )
 	{
-		return RBCBridge.execWithArguments("iBeacon", "removeAllBeacons", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("iBeacon", "removeAllBeacons", ["successCallback", "failedCallback"], arguments);
 	}
 };
 
-RBCBridge.loadParameters("iBeacon", ["supported"], function (parameters) {
+__Bridge.loadParameters("iBeacon", ["supported"], function (parameters) {
 	if (parameters.iBeacon != null && parameters.iBeacon !== undefined)
 		iBeacon.supported = parameters.iBeacon.supported;
 	else
@@ -3364,17 +3374,17 @@ var nfc = {
 
 
     write: function (ndefMessage, successCallback, errorCallback) {
-        return RBCBridge.execWithArguments("nfc", "writeTag", ["ndefMessage", "successCallback", "failedCallback"], arguments);
+        return __Bridge.execWithArguments("nfc", "writeTag", ["ndefMessage", "successCallback", "failedCallback"], arguments);
     },
 
 
     share: function (ndefMessage, successCallback, errorCallback) {
-        return RBCBridge.execWithArguments("nfc", "shareTag", ["ndefMessage", "successCallback", "failedCallback"], arguments);
+        return __Bridge.execWithArguments("nfc", "shareTag", ["ndefMessage", "successCallback", "failedCallback"], arguments);
     },
 
 
     unshare: function (successCallback, errorCallback) {
-        return RBCBridge.execWithArguments("nfc", "unshareTag", ["successCallback", "failedCallback"], arguments);
+        return __Bridge.execWithArguments("nfc", "unshareTag", ["successCallback", "failedCallback"], arguments);
     },
 
     handover: function (uris, errorCallback) {
@@ -3382,16 +3392,16 @@ var nfc = {
         if (!Array.isArray(uris)) {
             uris = [ uris ];
         }
-        return RBCBridge.exec("nfc", "handover", {"uris":uris}, null, errorCallback);
+        return __Bridge.exec("nfc", "handover", {"uris":uris}, null, errorCallback);
     },
 
     stopHandover: function (errorCallback) {
-        return RBCBridge.exec("nfc", "stopHandover", null, null, errorCallback);
+        return __Bridge.exec("nfc", "stopHandover", null, null, errorCallback);
     },
 
 
     erase: function (errorCallback) {
-        return RBCBridge.exec("nfc", "eraseTag", null, null, errorCallback);
+        return __Bridge.exec("nfc", "eraseTag", null, null, errorCallback);
     },
 
 
@@ -3638,7 +3648,7 @@ window.nfc = nfc;
 window.ndef = ndef;
 window.fireNfcTagEvent = fireNfcTagEvent;
 
-RBCBridge.loadParameters("nfc", ["supported"], function (parameters) {
+__Bridge.loadParameters("nfc", ["supported"], function (parameters) {
     if (parameters.nfc != null && parameters.nfc !== undefined)
         nfc.supported = parameters.nfc.supported;
     else
@@ -3655,47 +3665,90 @@ window.speech =
 	
 	init: function ( successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "init", ["successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "init", ["successCallback", "failedCallback"], arguments);
 	},
 
-	/** options: {
+	/** speak the passed in text as synthesized speech
+	options: {
 	 				text: string, // text
 	 				queueMode: int, //  0 - QUEUE_FLUSH, 1 - QUEUE_ADD
 	 			}
 	 */
 	speak: function ( options, successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "speak", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "speak", ["options", "successCallback", "failedCallback"], arguments);
+	},
+
+	/** speak the passed in silence as synthesized speech
+	options: {
+	 				silence: double, // time in seconds
+	 				queueMode: int, //  0 - QUEUE_FLUSH, 1 - QUEUE_ADD
+	 			}
+	 */
+	silence: function ( options, successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("speech", "silence", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
 		set Language and Country for TTS. The language codes are two-letter lowercase ISO language codes (such as "en") as defined by ISO 639-1. The country codes are two-letter uppercase ISO country codes (such as "US") as defined by ISO 3166-1.
 
 		options: {
-	 				language: string, // Possible values is en_US , en_GB e.t.c.
-	 			}
+			language: string // Possible values is en_US , en_GB e.t.c.
+		}
 
 	*/
 	setLanguage: function ( options, successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "setLanguage", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "setLanguage", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
-		get language for TTS
+		get current TTS language
+
+		info: {
+			language: string
+		}
 	*/
-	getLanguage: function ( options, successCallback , failedCallback )
+	getLanguage: function ( successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "getLanguage", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "getLanguage", ["successCallback", "failedCallback"], arguments);
 	},
+
+	/*
+		Finds out if the language is currently supported by the TTS service.
+		
+		return value in successCallback:
+		info: {
+			languageAvailable: boolean // true for available language
+		}
+		
+		return value in errorCallback:
+    		error {
+            	code: int,
+            	message: string
+         	}
+    */
+	isLanguageAvailable: function(options, successCallback, errorCallback) {
+         return __Bridge.execWithArguments("speech", "isLanguageAvailable", ["options", "successCallback", "failedCallback"], arguments);
+    },
 
 	/*
 		checks that TTS engine is busy
-
+		return value in successCallback:
+		info: {
+			speaking: boolean // true if TTS speaking text
+		}
+		
+		return value in errorCallback:
+    		error {
+            	code: int,
+            	message: string
+         	}
 	*/
-	isSpeaking: function ( options, successCallback , failedCallback )
+	isSpeaking: function ( successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "isSpeaking", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "isSpeaking", ["successCallback", "failedCallback"], arguments);
 	},
 
 	/** options: {
@@ -3704,7 +3757,7 @@ window.speech =
 	 */
 	setPitch: function ( options, successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "setPitch", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "setPitch", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/** options: {
@@ -3713,7 +3766,7 @@ window.speech =
 	 */
 	setSpeechRate: function ( options, successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "setSpeechRate", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "setSpeechRate", ["options", "successCallback", "failedCallback"], arguments);
 	},
 
 	/*
@@ -3721,13 +3774,101 @@ window.speech =
 	*/
 	stop: function ( options, successCallback , failedCallback )
 	{
-		return RBCBridge.execWithArguments("speech", "stop", ["options", "successCallback", "failedCallback"], arguments);
+		return __Bridge.execWithArguments("speech", "stop", ["options", "successCallback", "failedCallback"], arguments);
+	},
+	/*
+		shutdown speech service. Call init method before continue using module after shutdown
+	*/
+	shutdown: function ( successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("speech", "shutdown", ["successCallback", "failedCallback"], arguments);
 	}
 }
 
-RBCBridge.loadParameters("speech", ["supported"], function (parameters) {
+__Bridge.loadParameters("speech", ["supported"], function (parameters) {
     if (parameters.speech != null && parameters.speech !== undefined)
         speech.supported = parameters.speech.supported;
     else
         speech.supported = false;
 });
+
+
+/***************************** voice *****************************/
+
+
+window.voice =
+{
+	supported: false,
+
+	/*
+		checks that Voice recognition available
+		return value in successCallback:
+		info: {
+			available: boolean // true if available
+		}
+		
+		return value in errorCallback:
+    		error {
+            	code: int,
+            	message: string
+         	}
+	*/
+	isRecognitionAvailable: function( successCallback , failedCallback ){
+		return __Bridge.execWithArguments("voice", "isRecognitionAvailable", ["successCallback", "failedCallback"], arguments);
+	},
+
+	/*
+		start recognizing. For continues recognizing you have call this method after every received results
+		in successCallback (or you will get only 1 recognized result)
+		return value in successCallback:
+		info: {
+			recognized: string // line with recognized text
+		}
+		
+		return value in errorCallback:
+    		error {
+            	code: int,
+            	message: string
+         	}
+	*/
+	recognize: function ( successCallback , failedCallback )
+	{
+		var preparedArguments = __Bridge.prepareArguments(["successCallback", "failedCallback"], arguments);
+
+        successCallback = preparedArguments.successCallback;
+        errorCallback = preparedArguments.failedCallback;
+		var id = this._getId();
+		__Bridge.exec("voice", "recognize", {"id":id}, successCallback, errorCallback);
+
+        return id;
+	},
+
+	/*
+		stop recognizing.
+	*/
+	stop: function ( id, successCallback , failedCallback )
+	{
+		if ( id ){
+			var preparedArguments = __Bridge.prepareArguments(["successCallback", "failedCallback"], arguments);
+
+        	successCallback = preparedArguments.successCallback;
+        	errorCallback = preparedArguments.failedCallback;
+			__Bridge.exec("voice", "stop", {"id":id}, successCallback, errorCallback);
+		}
+	},
+	_lastGeneratedId: 0,
+
+	_getId: function ()
+    {
+    	this._lastGeneratedId ++;
+    	return ""+this._lastGeneratedId;
+    }
+}
+
+__Bridge.loadParameters("voice", ["supported"], function (parameters) {
+    if (parameters.voice != null && parameters.voice !== undefined)
+        voice.supported = parameters.voice.supported;
+    else
+        voice.supported = false;
+});
+
