@@ -2836,6 +2836,23 @@ window.archiving =
 }
 
 
+/***************************** screenshot *****************************/
+
+
+window.screenshot = {
+
+    supported: false,
+
+    make: function(options, successCallback, errorCallback) {
+        return __Bridge.execWithArguments("screenshot", "make", ["options", "successCallback", "failedCallback"], arguments);
+    }
+};
+
+__Bridge.loadParameters("screenshot", ["supported"], function (parameters) {
+    screenshot.supported = parameters.screenshot ? parameters.screenshot.supported : false;
+});
+
+
 /***************************** launch *****************************/
 
 
@@ -2950,6 +2967,13 @@ window.mainMenu =
 
 window.navigationBar =
 {
+	capabilities: {
+		buttons: {
+			left: ['text', 'icon', 'loading'],
+			right: ['text', 'icon', 'loading']
+		}
+	},
+
 	show: function ( options, successCallback, errorCallback )
 	{
 		return __Bridge.execWithArguments("navigationBar", "show", ["options", "successCallback", "failedCallback"], arguments);
@@ -2980,6 +3004,14 @@ window.navigationBar =
 		return __Bridge.execWithArguments("navigationBar", "setRightButton", ["options", "successCallback", "failedCallback"], arguments);
 	}
 };
+
+__Bridge.loadParameters("navigationBar", ["capabilities"], function (parameters) {
+	if (parameters.navigationBar && parameters.navigationBar.capabilities) {
+		if (parameters.navigationBar.capabilities.buttons) {
+			navigationBar.capabilities.buttons = parameters.navigationBar.capabilities.buttons;
+		}
+	}
+});
 
 
 /***************************** iBeacon *****************************/
