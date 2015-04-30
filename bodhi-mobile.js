@@ -693,7 +693,7 @@ window.deviceOrientation =
 /***************************** connection *****************************/
 
 
-var BodhiMobileConnectionMonitor = function() {
+var ConnectionMonitor = function() {
     this.id = null;
     this.url = null;
     this.available = false;
@@ -701,7 +701,7 @@ var BodhiMobileConnectionMonitor = function() {
     this._availableCallbacks = [];
 };
 
-BodhiMobileConnectionMonitor.prototype.stop = function(successCallback, errorCallback) {
+ConnectionMonitor.prototype.stop = function(successCallback, errorCallback) {
     var monitor = this;
 
     return __Bridge.exec("connection", "stopMonitoring", {
@@ -713,7 +713,7 @@ BodhiMobileConnectionMonitor.prototype.stop = function(successCallback, errorCal
     }, errorCallback);
 };
 
-BodhiMobileConnectionMonitor.prototype.onAvailableChanged = function(callback) {
+ConnectionMonitor.prototype.onAvailableChanged = function(callback) {
     this._availableCallbacks.push(callback);
     return this;
 };
@@ -748,7 +748,7 @@ window.connection = {
      *
      * return value in successCallback:
      * info {
-                monitor: BodhiMobileConnectionMonitor object
+                monitor: ConnectionMonitor object
             }
      * return value in errorCallback:
      * error {
@@ -766,7 +766,7 @@ window.connection = {
             if (info.monitorId == null || info.monitorId === undefined)
                 return;
 
-            var connectionMonitor = new BodhiMobileConnectionMonitor();
+            var connectionMonitor = new ConnectionMonitor();
             connectionMonitor.id = info.monitorId;
             connectionMonitor.url = info.url;
             connectionMonitor.available = info.available || false;
@@ -1727,7 +1727,7 @@ window.camera =
 /***************************** audio *****************************/
 
 
-var BodhiMobileAudioItemState = {
+var AudioItemState = {
   STOPPED: 0,
   PLAYING: 1,
   PAUSED: 2,
@@ -1735,10 +1735,10 @@ var BodhiMobileAudioItemState = {
   INTERRUPTER: 4
 };
 
-var BodhiMobileAudioItem = function() {
+var AudioItem = function() {
   this.itemId = null;
   this.key = null;
-  this.state = BodhiMobileAudioItemState.STOPPED;
+  this.state = AudioItemState.STOPPED;
   this.duration = 0;
   this.position = 0;
 
@@ -1747,7 +1747,7 @@ var BodhiMobileAudioItem = function() {
   this._positionCallbacks = [];
 };
 
-BodhiMobileAudioItem.prototype.close = function(successCallback, errorCallback) {
+AudioItem.prototype.close = function(successCallback, errorCallback) {
   this._stateCallbacks = [];
   this._durationCallbacks = [];
   this._positionCallbacks = [];
@@ -1759,7 +1759,7 @@ BodhiMobileAudioItem.prototype.close = function(successCallback, errorCallback) 
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.getDuration = function(successCallback, errorCallback) {
+AudioItem.prototype.getDuration = function(successCallback, errorCallback) {
   var audioId = this.itemId;
   return __Bridge.exec("audio", "getDuration", {
     "audioId": this.itemId
@@ -1774,61 +1774,61 @@ BodhiMobileAudioItem.prototype.getDuration = function(successCallback, errorCall
   }, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.startPlaying = function(successCallback, errorCallback) {
+AudioItem.prototype.startPlaying = function(successCallback, errorCallback) {
   return __Bridge.exec("audio", "startPlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.stopPlaying = function(successCallback, errorCallback) {
+AudioItem.prototype.stopPlaying = function(successCallback, errorCallback) {
   return __Bridge.exec("audio", "stopPlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.pausePlaying = function(successCallback, errorCallback) {
+AudioItem.prototype.pausePlaying = function(successCallback, errorCallback) {
   return __Bridge.exec("audio", "pausePlaying", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.seekTo = function(position, successCallback, errorCallback) {
+AudioItem.prototype.seekTo = function(position, successCallback, errorCallback) {
   return __Bridge.exec("audio", "seekTo", {
     "audioId": this.itemId,
     "position": position
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.startRecording = function(successCallback, errorCallback) {
+AudioItem.prototype.startRecording = function(successCallback, errorCallback) {
   return __Bridge.exec("audio", "startRecording", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.stopRecording = function(successCallback, errorCallback) {
+AudioItem.prototype.stopRecording = function(successCallback, errorCallback) {
   return __Bridge.exec("audio", "stopRecording", {
     "audioId": this.itemId
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.setVolume = function(volume, successCallback, errorCallback) {
+AudioItem.prototype.setVolume = function(volume, successCallback, errorCallback) {
   return __Bridge.exec("audio", "setVolume", {
     "audioId": this.itemId,
     "volume": volume
   }, successCallback, errorCallback);
 };
 
-BodhiMobileAudioItem.prototype.onStateChanged = function(callback) {
+AudioItem.prototype.onStateChanged = function(callback) {
   this._stateCallbacks.push(callback);
   return this;
 };
 
-BodhiMobileAudioItem.prototype.onDurationChanged = function(callback) {
+AudioItem.prototype.onDurationChanged = function(callback) {
   this._durationCallbacks.push(callback);
   return this;
 };
 
-BodhiMobileAudioItem.prototype.onPositionChanged = function(callback) {
+AudioItem.prototype.onPositionChanged = function(callback) {
   this._positionCallbacks.push(callback);
   return this;
 };
@@ -1848,7 +1848,7 @@ window.audio = {
       if (info.audioId == null || info.audioId === undefined)
         return;
 
-      var audioItem = new BodhiMobileAudioItem();
+      var audioItem = new AudioItem();
       audioItem.itemId = info.audioId;
       audioItem.key = info.key;
 
@@ -3748,6 +3748,18 @@ window.speech =
 	},
 
 	/*
+		get supported languages
+
+		info: {
+			supportLanguages: array
+		}
+	*/
+	getSupportLanguages: function ( successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("speech", "getSupportLanguages", ["successCallback", "failedCallback"], arguments);
+	},
+
+	/*
 		Finds out if the language is currently supported by the TTS service.
 		
 		return value in successCallback:
@@ -3848,6 +3860,61 @@ window.voice =
 	isRecognitionAvailable: function( successCallback , failedCallback ){
 		return __Bridge.execWithArguments("voice", "isRecognitionAvailable", ["successCallback", "failedCallback"], arguments);
 	},
+
+	/*
+		set Language and Country for Voice Recognition. The language codes are two-letter lowercase ISO language codes (such as "en") as defined by ISO 639-1. The country codes are two-letter uppercase ISO country codes (such as "US") as defined by ISO 3166-1.
+
+		options: {
+			language: string // Possible values is en_US , en_GB e.t.c.
+		}
+
+	*/
+	setLanguage: function ( options, successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("voice", "setLanguage", ["options", "successCallback", "failedCallback"], arguments);
+	},
+
+	/*
+		get current Voice Recognition language
+
+		info: {
+			language: string
+		}
+	*/
+	getLanguage: function ( successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("voice", "getLanguage", ["successCallback", "failedCallback"], arguments);
+	},
+
+	/*
+		get supported languages
+
+		info: {
+			supportLanguages: array
+		}
+	*/
+	getSupportLanguages: function ( successCallback , failedCallback )
+	{
+		return __Bridge.execWithArguments("voice", "getSupportLanguages", ["successCallback", "failedCallback"], arguments);
+	},
+
+	/*
+		Finds out if the language is currently supported by the Voice Recognition service.
+		
+		return value in successCallback:
+		info: {
+			languageAvailable: boolean // true for available language
+		}
+		
+		return value in errorCallback:
+    		error {
+            	code: int,
+            	message: string
+         	}
+    */
+	isLanguageAvailable: function(options, successCallback, errorCallback) {
+         return __Bridge.execWithArguments("voice", "isLanguageAvailable", ["options", "successCallback", "failedCallback"], arguments);
+    },
 
 	/*
 		start recognizing. For continues recognizing you have call this method after every received results
