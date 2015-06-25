@@ -628,6 +628,12 @@ window.device =
         TABLET: "tablet"
     },
 
+    CONTAINER_TYPES: {
+        UNKNOWN: 0,
+        SINGLE: 1,
+        MULTIPLE: 2
+    },
+
 	model: null,
 	platform: null,
 	uuid: null,
@@ -637,6 +643,7 @@ window.device =
 	appName: null,
 	appVersion: null,
 	appBuild: null,
+	containerType: 0,
 
 	ready: function ( readyCallback )
 	{
@@ -660,7 +667,7 @@ window.device =
 	}
 }
 
-__Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild"], function (parameters) {
+__Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild", "containerType"], function (parameters) {
 	if (parameters && parameters.device)
 	{
 		for (var key in parameters.device) {
