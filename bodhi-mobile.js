@@ -644,6 +644,7 @@ window.device =
 	appVersion: null,
 	appBuild: null,
 	containerType: 0,
+	namespace: null,
 
 	ready: function ( readyCallback )
 	{
@@ -667,7 +668,7 @@ window.device =
 	}
 }
 
-__Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild", "containerType"], function (parameters) {
+__Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name", "type", "appName", "appVersion", "appBuild", "containerType", "namespace"], function (parameters) {
 	if (parameters && parameters.device)
 	{
 		for (var key in parameters.device) {
@@ -677,6 +678,11 @@ __Bridge.loadParameters("device", ["model", "platform", "uuid", "version", "name
 		}
 	}
 });
+
+events.addEventListener("device.namespaceChanged", function(info) {
+	window.device.namespace = info.namespace;
+});
+
 
 
 /***************************** deviceOrientation *****************************/
