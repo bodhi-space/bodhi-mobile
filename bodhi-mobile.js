@@ -1289,6 +1289,46 @@ __Bridge.loadParameters("notifications", ["replaceSystemAlert"], function (param
 });
 
 
+/***************************** pushNotifications *****************************/
+
+
+window.pushNotifications =
+{
+	token: null,
+	enabled: false,
+	lastNotificationUrl: null,
+
+	onNotification: function(callback) {
+		if (this.lastNotificationUrl) {
+			callback({url:this.lastNotificationUrl});
+			this.lastNotificationUrl = null;
+		}
+
+		events.addEventListener("pushNotifications.notification", callback);
+
+		return this;
+	}
+};
+
+__Bridge.loadParameters("pushNotifications", ["token","enabled","lastNotificationUrl"], function (parameters) {
+	if (parameters && parameters.pushNotifications)
+	{
+		for (var key in parameters.pushNotifications) {
+  			if (parameters.pushNotifications.hasOwnProperty(key)) {
+  				pushNotifications[key] = parameters.pushNotifications[key];
+  			}
+		}
+	}
+});
+
+events.addEventListener("pushNotifications.token", function(info) {
+	window.pushNotifications.token = info.token;
+});
+events.addEventListener("pushNotifications.enabled", function(info) {
+	window.pushNotifications.enabled = info.enabled;
+});
+
+
 /***************************** contacts *****************************/
 
 
